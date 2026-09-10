@@ -20,6 +20,7 @@ BeforeAll {
             [pscustomobject]@{
                 ExitCode = $process.ExitCode
                 StdOut   = (Get-Content -LiteralPath $standardOutputPath -Raw)
+                StdErr   = (Get-Content -LiteralPath $standardErrorPath -Raw)
             }
         }
         finally {
@@ -82,5 +83,6 @@ Describe 'math-tool.ps1 direct execution' {
         $result = Invoke-MathToolCli -NValue '-1'
         $result.ExitCode | Should -Not -Be 0
         $result.StdOut | Should -BeNullOrEmpty
+        $result.StdErr | Should -Not -BeNullOrEmpty
     }
 }
