@@ -5,14 +5,14 @@ BeforeAll {
     function Invoke-MathToolCli {
         param(
             [Parameter(Mandatory)]
-            [string] $Arguments
+            [string] $NValue
         )
 
         $standardOutputPath = New-TemporaryFile
         $standardErrorPath = New-TemporaryFile
         try {
-            $process = Start-Process -FilePath (Join-Path $PSHOME 'pwsh') `
-                -ArgumentList @('-NoLogo', '-NoProfile', '-File', $script:ScriptPath, '-N', $Arguments) `
+            $process = Start-Process -FilePath (Get-Process -Id $PID).Path `
+                -ArgumentList @('-NoLogo', '-NoProfile', '-File', $script:ScriptPath, '-N', $NValue) `
                 -RedirectStandardOutput $standardOutputPath `
                 -RedirectStandardError $standardErrorPath `
                 -Wait -PassThru -NoNewWindow
@@ -44,7 +44,7 @@ Describe 'Get-Fibonacci' {
     It 'emits only the numeric result with no incidental output' {
         $output = @(Get-Fibonacci -N 10)
         $output.Count | Should -Be 1
-        $output[0] | Should -BeOfType [long]
+        $output[0] | Should -BeOfType [bigint]
     }
 
     It 'rejects negative input instead of computing a value' {
@@ -66,20 +66,20 @@ Describe 'math-tool.ps1 direct execution' {
         @{ N = 1; Expected = '1' }
         @{ N = 10; Expected = '55' }
     ) {
-        $result = Invoke-MathToolCli -Arguments "$N"
+        $result = Invoke-MathToolCli -NValue "$N"
         $result.ExitCode | Should -Be 0
         $result.StdOut.Trim() | Should -BeExactly "Fibonacci($N) = $Expected"
     }
 
     It 'writes exactly one non-empty result line to stdout' {
-        $result = Invoke-MathToolCli -Arguments '10'
+        $result = Invoke-MathToolCli -NValue '10'
         $lines = @($result.StdOut -split '\r?\n' | Where-Object { $_ -ne '' })
         $lines.Count | Should -Be 1
         $lines[0] | Should -BeExactly 'Fibonacci(10) = 55'
     }
 
     It 'rejects negative input without producing a result line' {
-        $result = Invoke-MathToolCli -Arguments '-1'
+        $result = Invoke-MathToolCli -NValue '-1'
         $result.ExitCode | Should -Not -Be 0
         $result.StdOut | Should -BeNullOrEmpty
     }
