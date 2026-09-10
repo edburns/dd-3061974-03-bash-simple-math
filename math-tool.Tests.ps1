@@ -15,7 +15,7 @@ BeforeAll {
                 -ArgumentList @('-NoLogo', '-NoProfile', '-File', $script:ScriptPath, '-N', $NValue) `
                 -RedirectStandardOutput $standardOutputPath `
                 -RedirectStandardError $standardErrorPath `
-                -Wait -PassThru -NoNewWindow
+                -Wait -PassThru
 
             [pscustomobject]@{
                 ExitCode = $process.ExitCode
